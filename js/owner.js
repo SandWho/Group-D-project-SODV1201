@@ -75,45 +75,26 @@ let listings = [
     ownerPhone: "1234567890"
   }
 ];
+    
 
-function renderListings() {
-  const $container = $("#listings-container");
-  $container.empty();
 
-  if (listings.length === 0) {
-    $container.html("<p>No listings yet.</p>");
-    return;
+let editMode = false;
+let editingId = null;
+
+function logout() {
+  if (confirm("Are you sure you want to log out?")) {
+    window.location.href = "../index.html";
   }
+}
 
-  $.each(listings, function (index, listing) {
-    const $listingDiv = $(`
-      <div class="listing">
-        <div class="listing-info">
-          <h3>${listing.name}</h3>
-          <p><strong>$${listing.price} / ${listing.rentalTerm}</strong></p>
-          <button class="show-details-btn">Show More</button>
-          <div class="details" style="display: none; margin-top: 10px;">
-            <p>Address: ${listing.address}</p>
-            <p>Area: ${listing.area} m²</p>
-            <p>Type: ${listing.type}</p>
-            <p>Capacity: ${listing.capacity} people</p>
-            <p>Parking: ${listing.parking}</p>
-            <p>Public Transport: ${listing.publicTransport}</p>
-            <p>Available: ${listing.availability}</p>
-            <hr>
-            <p><strong>Owner Email:</strong> <a href="mailto:${listing.ownerEmail}">${listing.ownerEmail}</a></p>
-            <p><strong>Owner Phone:</strong> <a href="tel:${listing.ownerPhone}">${listing.ownerPhone}</a></p>
-          </div>
-        </div>
-        <div class="listing-actions">
-          <button class="edit-btn">Edit</button>
-          <button class="remove-btn">Remove</button>
-        </div>
-      </div>
-    `);
+function toggleFormVisibility() {
+  const formSection = $("#form-section");
+  formSection.css("display", formSection.css("display") === "none" ? "flex" : "none");
+}
 
-    $container.append($listingDiv);
-  });
+function toggleDropdown() {
+  const dropdown = $("#profileDropdown");
+  dropdown.css("display", dropdown.css("display") === "flex" ? "none" : "flex");
 }
 
 function submitForm() {
@@ -134,8 +115,13 @@ function submitForm() {
     return;
   }
 
+  if (isNaN(area) || area <= 0 || isNaN(capacity) || capacity <= 0 || isNaN(price) || price <= 0) {
+    message.text("Area, capacity, and price must be positive numbers!").css("color", "#ff4d4d");
+    return;
+  }
+
   const listing = {
-    id: Date.now(),
+    id: editMode ? editingId : Date.now(),
     name,
     address,
     area,
@@ -145,52 +131,126 @@ function submitForm() {
     publicTransport,
     availability,
     rentalTerm,
-    price,
-    ownerEmail: "owner@example.com",
-    ownerPhone: "000-000-0000"
+    price
   };
 
-  listings.push(listing);
-  message.text("Listing added successfully!").css("color", "#28a745");
+  if (editMode) {
+    listings = listings.map(item => item.id === editingId ? listing : item);
+    message.text("Listing updated successfully!");
+    exitEditMode();
+  } else {
+    listings.push(listing);
+    message.text("Listing added successfully!");
+  }
+
+  message.css("color", "#28a745");
   clearForm();
   renderListings();
 }
 
-function toggleDetails($button) {
-  const $details = $button.next(".details");
-  const isVisible = $details.is(":visible");
+function editListing(id) {
+  const listing = listings.find(item => item.id === id);
+  if (!listing) return;
 
-  $details.toggle();
-  $button.text(isVisible ? "Show More" : "Show Less");
+  $("#listing-name").val(listing.name);
+  $("#listing-address").val(listing.address);
+  $("#listing-area").val(listing.area);
+  $("#listing-type").val(listing.type);
+  $("#listing-capacity").val(listing.capacity);
+  $("#listing-parking").val(listing.parking);
+  $("#listing-public-transport").val(listing.publicTransport);
+  $("#listing-availability").val(listing.availability);
+  $("#listing-term").val(listing.rentalTerm);
+  $("#listing-price").val(listing.price);
+
+  $("#form-button").text("Save Changes");
+  $("#form-title").text("Edit Listing");
+
+  editMode = true;
+  editingId = id;
+
+  $("#form-section").css("display", "flex");
 }
 
-function logout() {
-  if (confirm("Are you sure you want to log out?")) {
-    window.location.href = "../index.html";
+function exitEditMode() {
+  editMode = false;
+  editingId = null;
+  $("#form-button").text("Add Listing");
+  $("#form-title").text("Add New Listing");
+}
+
+function removeListing(id) {
+  listings = listings.filter(listing => listing.id !== id);
+  renderListings();
+}
+
+function toggleDetails(button) {
+  const details = $(button).next(".details");
+  const isVisible = details.css("display") === "block";
+
+  details.css("display", isVisible ? "none" : "block");
+  $(button).text(isVisible ? "Show More" : "Show Less");
+}
+
+function renderListings() {
+  const container = $("#listings-container");
+  container.empty();
+
+  if (listings.length === 0) {
+    container.html("<p>No listings yet.</p>");
+    return;
   }
+
+  listings.forEach(listing => {
+    const listingDiv = $(`
+      <div class="listing">
+        <div class="listing-info">
+          <h3>${listing.name}</h3>
+          <p><strong>$${listing.price} / ${listing.rentalTerm}</strong></p>
+          <button class="show-details-btn">Show More</button>
+          <div class="details" style="display: none; margin-top: 10px;">
+            <p>Address: ${listing.address}</p>
+            <p>Area: ${listing.area} m²</p>
+            <p>Type: ${listing.type}</p>
+            <p>Capacity: ${listing.capacity} people</p>
+            <p>Parking: ${listing.parking}</p>
+            <p>Public Transport: ${listing.publicTransport}</p>
+            <p>Available: ${listing.availability}</p>
+            <hr>
+            <p><strong>Owner Email:</strong> ${listing.ownerEmail}</p>
+            <p><strong>Owner Phone:</strong> ${listing.ownerPhone}</p>
+          </div>
+        </div>
+        <div class="listing-actions">
+          <button class="edit-btn">Edit</button>
+          <button class="remove-btn">Remove</button>
+        </div>
+      </div>
+    `);
+
+    listingDiv.find(".show-details-btn").click(function() { toggleDetails(this); });
+    listingDiv.find(".edit-btn").click(function() { editListing(listing.id); });
+    listingDiv.find(".remove-btn").click(function() { removeListing(listing.id); });
+
+    container.append(listingDiv);
+  });
 }
 
 function clearForm() {
-  $("#listing-name, #listing-address, #listing-area, #listing-type, #listing-capacity, #listing-parking, #listing-public-transport, #listing-availability, #listing-term, #listing-price").val("");
+  $("#listing-name").val("");
+  $("#listing-address").val("");
+  $("#listing-area").val("");
+  $("#listing-type").val("");
+  $("#listing-capacity").val("");
+  $("#listing-parking").val("");
+  $("#listing-public-transport").val("");
+  $("#listing-availability").val("");
+  $("#listing-term").val("");
+  $("#listing-price").val("");
+
+  exitEditMode();
 }
 
-$(document).ready(function () {
+$(document).ready(() => {
   renderListings();
-
-  $(document).on("click", ".show-details-btn", function () {
-    toggleDetails($(this));
-  });
-
-  $(document).on("click", ".edit-btn", function () {
-    alert("Edit functionality not implemented yet!");
-  });
-
-  $(document).on("click", ".remove-btn", function () {
-    const index = $(this).closest(".listing").index();
-    listings.splice(index, 1);
-    renderListings();
-  });
-
-  $("#form-button").on("click", submitForm);
-  $(".profile-menu").on("click", toggleDropdown);
 });

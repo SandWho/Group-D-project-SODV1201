@@ -4,6 +4,10 @@ let currentUser = {
     email: "john@example.com"
   };
   
+  $("#profile-email").val(currentUser.email);
+  $("#profile-username").val(currentUser.username);
+  $("#profile-phone").val(currentUser.phone);
+  
   function isValidEmail(email) {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
@@ -13,20 +17,20 @@ let currentUser = {
     const usernameInput = $("#profile-username").val().trim();
     const phoneInput = $("#profile-phone").val().trim();
     const emailInput = $("#profile-email").val().trim().toLowerCase();
-    const $message = $("#update-message");
+    const message = $("#update-message");
   
     if (!usernameInput) {
-      $message.text("Username cannot be empty!").css("color", "#ff4d4d");
+      message.text("Username cannot be empty!").css("color", "#ff4d4d");
       return;
     }
   
     if (!/^[0-9]{10,15}$/.test(phoneInput)) {
-      $message.text("Invalid phone number format (digits only, 10-15 characters)!").css("color", "#ff4d4d");
+      message.text("Invalid phone number format (digits only, 10-15 characters)!").css("color", "#ff4d4d");
       return;
     }
   
     if (!isValidEmail(emailInput)) {
-      $message.text("Invalid email format!").css("color", "#ff4d4d");
+      message.text("Invalid email format!").css("color", "#ff4d4d");
       return;
     }
   
@@ -34,20 +38,11 @@ let currentUser = {
     currentUser.phone = phoneInput;
     currentUser.email = emailInput;
   
-    $message.text("Profile updated successfully! Please re-log in.").css("color", "#28a745");
+    message.text("Profile updated successfully! Please re-log in.").css("color", "#28a745");
   
     setTimeout(() => {
-      sessionStorage.clear(); // Optional if you store session data
+      sessionStorage.clear();
       window.location.href = "../index.html";
     }, 3000);
   }
-  
-  $(document).ready(() => {
-    // Pre-fill the fields with the user's data
-    $("#profile-email").val(currentUser.email);
-    $("#profile-username").val(currentUser.username);
-    $("#profile-phone").val(currentUser.phone);
-  
-    $("button").first().on("click", updateProfile);
-  });
   

@@ -76,17 +76,29 @@ let listings = [
   }
 ];
 
-function renderListings() {
-  const $container = $("#listings-container");
-  $container.empty();
+function logout() {
+  if (confirm("Are you sure you want to log out?")) {
+    window.location.href = "../index.html";
+  }
+}
 
-  if (listings.length === 0) {
-    $container.html("<p>No listings available.</p>");
+function renderListings() {
+  const container = $("#listings-container");
+
+  if (!container.length) {
+    console.error("Listings container not found!");
     return;
   }
 
-  $.each(listings, function (index, listing) {
-    const $listingDiv = $(`
+  container.empty();
+
+  if (listings.length === 0) {
+    container.html("<p>No listings available.</p>");
+    return;
+  }
+
+  listings.forEach(listing => {
+    const listingDiv = $(`
       <div class="listing" 
            data-area="${listing.area}" 
            data-parking="${listing.parking}" 
@@ -106,35 +118,42 @@ function renderListings() {
             <p>Public Transport: ${listing.publicTransport}</p>
             <p>Available: ${listing.available}</p>
             <hr>
-            <p><strong>Owner Email:</strong> <a href="mailto:${listing.ownerEmail}">${listing.ownerEmail}</a></p>
-            <p><strong>Owner Phone:</strong> <a href="tel:${listing.ownerPhone}">${listing.ownerPhone}</a></p>
+            <p><strong>Owner Email:</strong> ${listing.ownerEmail}</p>
+            <p><strong>Owner Phone:</strong> ${listing.ownerPhone}</p>
           </div>
         </div>
       </div>
     `);
 
-    $container.append($listingDiv);
+    listingDiv.find(".show-details-btn").click(function () {
+      toggleDetails(this);
+    });
+
+    container.append(listingDiv);
   });
 }
 
 function toggleDropdown() {
-  $("#profileDropdown").toggle();
+  const dropdown = $("#profileDropdown");
+  dropdown.css("display", dropdown.css("display") === "flex" ? "none" : "flex");
 }
 
 function toggleFilter() {
-  $("#filterSection").toggle();
+  const filterSection = $("#filterSection");
+  filterSection.css("display", filterSection.css("display") === "flex" ? "none" : "flex");
 }
 
 function toggleSearch() {
-  $("#searchSection").toggle();
+  const searchSection = $("#searchSection");
+  searchSection.css("display", searchSection.css("display") === "flex" ? "none" : "flex");
 }
 
-function toggleDetails($button) {
-  const $details = $button.next(".details");
-  const isVisible = $details.is(":visible");
+function toggleDetails(button) {
+  const details = $(button).next(".details");
+  const isVisible = details.css("display") === "block";
 
-  $details.toggle();
-  $button.text(isVisible ? "Show Details" : "Hide Details");
+  details.css("display", isVisible ? "none" : "block");
+  $(button).text(isVisible ? "Show Details" : "Hide Details");
 }
 
 function applyFiltersAndSort() {
@@ -145,16 +164,17 @@ function applyFiltersAndSort() {
   const sortOrder = $("#sortPrice").val();
   const searchQuery = $("#searchInput").val().toLowerCase();
 
-  let $listings = $(".listing");
+  const container = $("#listings-container");
+  let filteredListings = container.find(".listing");
 
-  $listings.each(function () {
-    const $listing = $(this);
-    const area = parseInt($listing.data("area"));
-    const parking = $listing.data("parking");
-    const publicTransport = $listing.data("publictransport");
-    const available = $listing.data("available");
-    const title = $listing.find("h3").text().toLowerCase();
-    const address = $listing.find("p:first").text().toLowerCase();
+  filteredListings.each(function () {
+    const listing = $(this);
+    const area = parseInt(listing.attr("data-area"));
+    const parking = listing.attr("data-parking");
+    const publicTransport = listing.attr("data-publictransport");
+    const available = listing.attr("data-available");
+    const title = listing.find("h3").text().toLowerCase();
+    const address = listing.find("p").first().text().toLowerCase();
 
     let show = true;
 
@@ -162,45 +182,35 @@ function applyFiltersAndSort() {
       const [minArea, maxArea] = areaValue.split("-").map(Number);
       if (area < minArea || area > maxArea) show = false;
     }
+
     if (parkingValue !== "all" && parking !== parkingValue) show = false;
     if (transportValue !== "all" && publicTransport !== transportValue) show = false;
     if (availabilityValue !== "all" && available !== availabilityValue) show = false;
-    if (searchQuery && !title.includes(searchQuery) && !address.includes(searchQuery)) show = false;
 
-    $listing.toggle(show);
+    if (searchQuery && !title.includes(searchQuery) && !address.includes(searchQuery)) {
+      show = false;
+    }
+
+    listing.css("display", show ? "flex" : "none");
   });
 
-  let sortedListings = $listings.filter(":visible");
+  let visibleListings = filteredListings.filter(function () {
+    return $(this).css("display") === "flex";
+  });
 
   if (sortOrder !== "none") {
-    sortedListings.sort(function (a, b) {
-      const priceA = parseInt($(a).data("price"));
-      const priceB = parseInt($(b).data("price"));
+    visibleListings.sort(function (a, b) {
+      const priceA = parseInt($(a).attr("data-price"));
+      const priceB = parseInt($(b).attr("data-price"));
       return sortOrder === "asc" ? priceA - priceB : priceB - priceA;
     });
-
-    const $container = $("#listings-container");
-    sortedListings.each(function () {
-      $container.append(this);
-    });
   }
-}
 
-function logout() {
-  if (confirm("Are you sure you want to log out?")) {
-    window.location.href = "../index.html";
-  }
-}
-
-$(document).ready(function () {
-  renderListings();
-
-  $(document).on("click", ".show-details-btn", function () {
-    toggleDetails($(this));
+  visibleListings.each(function () {
+    container.append($(this));
   });
+}
 
-  $(".profile-menu").on("click", toggleDropdown);
-  $(".filter-toggle-btn").on("click", toggleFilter);
-  $(".search-toggle-btn").on("click", toggleSearch);
-  $("#areaFilter, #parkingFilter, #publicTransportFilter, #availabilityFilter, #sortPrice, #searchInput").on("change keyup", applyFiltersAndSort);
+$(document).ready(() => {
+  renderListings();
 });
