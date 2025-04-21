@@ -1,0 +1,38 @@
+[
+  {
+    "username": "sandooo",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "role": "renter"
+  },
+  {
+    "username": "sand",
+    "email": "jane@example.com",
+    "phone": "12345676890",
+    "role": "owner"
+  },
+  {
+    "username": "janedoe",
+    "email": "janedoe@example.com",
+    "phone": "0987654321",
+    "role": "owner"
+  },
+  {
+    "username": "emilywong",
+    "email": "emily@example.com",
+    "phone": "2223334444",
+    "role": "owner"
+  },
+  {
+    "username": "johndoe",
+    "email": "john@example.com",
+    "phone": "1234567890",
+    "role": "renter"
+  },
+  {
+    "username": "mikesmith",
+    "email": "mike@example.com",
+    "phone": "5556667777",
+    "role": "renter"
+  }
+]

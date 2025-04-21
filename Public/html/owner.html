@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Home Page - RentEase</title>
+    <link rel="stylesheet" href="../css/owner.css">
+    <script src="../js/owner.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">RentAThing</div>
+        <div class="profile-menu" onclick="toggleDropdown()">
+          <span>Profile</span>
+          <div class="dropdown" id="profileDropdown">
+            <a href="profile.html">Edit Profile</a>
+            <a href="#" onclick="logout()">Log Out</a>
+          </div>
+        </div>
+      </nav>
+    
+      <div class="container">
+        <button onclick="toggleFormVisibility()">Add New Listing</button>
+
+    
+        <div class="form-section" id="form-section" style="display:none;">
+          <h2 id="form-title">Add New Listing</h2>
+          <input type="text" id="listing-name" placeholder="Name (e.g. Bow Valley Recording Studio)">
+          <textarea id="listing-address" placeholder="Address (e.g. 345 - 6 Avenue SE, Calgary, AB T2G 4V1)"></textarea>
+          <input type="number" id="listing-area" placeholder="Area (in square meters)">
+          <input type="text" id="listing-type" placeholder="Type (e.g. art studio, recording studio, etc.)">
+          <input type="number" id="listing-capacity" placeholder="Number of individuals it can accommodate">
+          <select id="listing-parking">
+            <option value="">Includes parking?</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+          <select id="listing-public-transport">
+            <option value="">Reachable by public transportation?</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+          <select id="listing-availability">
+            <option value="">Currently available to rent?</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+          <select id="listing-term">
+            <option value="">Rental term</option>
+            <option value="Hourly">Hourly</option>
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+          </select>
+          <input type="number" id="listing-price" placeholder="Price per rental term">
+          <button id="form-button" onclick="submitForm()">Add Listing</button>
+          <p id="form-message"></p>
+        </div>
+    
+        <div class="listings-section">
+
+          <div class="listings-header" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Your Listings</h2>
+            <button class="search-toggle-btn" onclick="toggleOwnerSearch()">Search</button>
+          </div>
+          
+          <div class="search-section" id="ownerSearchSection" style="display: none; width: 100%; margin-bottom: 20px;">
+            <label for="ownerSearchInput">Search by Name or Address:</label>
+            <input
+              type="text"
+              id="ownerSearchInput"
+              placeholder="Type a name or address..."
+              oninput="applyOwnerSearch()"
+              style="width: 100%; max-width: 400px;"
+            >
+          </div>
+          <div id="listings-container" style="width: 100%;">
+            <p>No listings yet.</p>
+          </div>
+        </div>
+      </div>
+  
+</body>
+</html>
